@@ -10,12 +10,12 @@ import time
 
 def suppress_stdout():
     with open(os.devnull, "w") as devnull:
-	old_stdout = sys.stdout
-	sys.stdout = devnull
-	try:
-	    yield
-	finally:
-	    sys.stdout = old_stdout
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
 
 
 def print_and_accept(pkt):
@@ -48,15 +48,15 @@ def print_and_accept(pkt):
 
     #granting a capability to a new client
     if(not(capabilityQueue.containsCapability(clientIP))):
-	newCapability = Capability(clientIP, time.time() + 30)
-	capabilityQueue.addCapability(newCapability)
-	mappedIP = newCapability.mapped_ip_addr
+        newCapability = Capability(clientIP, time.time() + 30)
+        capabilityQueue.addCapability(newCapability)
+        mappedIP = newCapability.mapped_ip_addr
 
     #this client already has a capability; retrieve its mapped ip address
     else:
-	for cap in capabilityQueue.capabilities:
-	    if cap.client_ip_addr == clientIP:
-		mappedIP = cap.mapped_ip_addr
+        for cap in capabilityQueue.capabilities:
+            if cap.client_ip_addr == clientIP:
+                mappedIP = cap.mapped_ip_addr
 
     
 
