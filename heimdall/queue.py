@@ -1,6 +1,9 @@
+import os
 import random
+import sys
 import threading
 import time
+import subprocess
 
 class Capability:
     def __init__(self, client_ip_addr,  expiration_time):
@@ -39,10 +42,13 @@ class CapabilityQueue:
 	
 	#add iptables rules for this capability
 	options = {'iptables': '/sbin/iptables', 'clientAddress': capability.client_ip_addr, 'mappedAddress': capability.mapped_ip_addr}
-	#rule = ___
-	#iptables = subprocess.call(rule, shell=True)
+	rule = "{iptables} -t nat -A PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
+	#rule2 ="{iptables} -t nat -A POSTROUTING -j MASQUERADE"
+	print "Calling IPtables"
+	iptables = subprocess.call(rule, shell=True)
+	#iptables = subprocess.call(rule2, shell=True)
 
-	print "A capability for", capability.client_ip_addr, "has been granted."
+	print "A capability for", capability.client_ip_addr, "has been granted on IP Address", capability.mapped_ip_addr
 
     def removeExpirations(self):
         current_time = time.time()
@@ -54,8 +60,9 @@ class CapabilityQueue:
 		self.activeClients.remove(cap.client_ip_addr)
 
 		#remove the iptables rules with this capability
-		
-
+		options = {'iptables': '/sbin/iptables', 'clientAddress': cap.client_ip_addr, 'mappedAddress': cap.mapped_ip_addr}
+		rule = "{iptables} -t nat -D PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)	
+		iptables = subprocess.call(rule, shell=True)
                 #finally remove the capability from the list
 		print "A capability for", cap.client_ip_addr, "has expired."
 		self.capabilities.remove(cap)
@@ -89,23 +96,3 @@ def queueHandler(queue):
         #    queue.printQueue()
         queue.removeExpirations()
         time.sleep(.5)
-'''
-try:
-    capQueue = CapabilityQueue()
-    queueThread = threading.Thread(target=queueHandler, args=(capQueue,))
-    queueThread.start()
-
-    capQueue.addCapability(Capability("10.0.0.1", time.time() + 20))
-    capQueue.addCapability(Capability("10.0.0.2", time.time() + 15))
-    capQueue.addCapability(Capability("10.0.0.3", time.time() + 30))
-    capQueue.addCapability(Capability("10.0.0.4", time.time() + 30))
-    capQueue.addCapability(Capability("10.0.0.5", time.time() + 25))
-    capQueue.addCapability(Capability("10.0.0.6", time.time() + 10))
-    capQueue.addCapability(Capability("10.0.0.7", time.time() + 2))
-    capQueue.addCapability(Capability("10.0.0.8", time.time() + 60))
-    capQueue.addCapability(Capability("10.0.0.9", time.time() + 50))
-
-except KeyboardInterrupt:
-    capQueue.disable()
-    queueThread.join()
-'''

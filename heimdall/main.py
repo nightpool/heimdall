@@ -26,15 +26,16 @@ def print_and_accept(pkt):
     #print new_packet[IP].src
     #print new_packet[IP].dst
     
+    #print "Received a packet destined for", new_packet[IP].dst
 
     #packet is arriving as a DNS lookup
     if new_packet[IP].dst == "10.4.2.3":
         # THIS SHOULD BE MOVED TO ANOTHER FUNCTION LATER
-        options = {'iptables': '/sbin/iptables', 'srcAddress': '10.4.2.6'}
+        #options = {'iptables': '/sbin/iptables', 'srcAddress': '10.4.2.6'}
         #print options
-        rule = '{iptables} -I INPUT -s {srcAddress} -j NFQUEUE --queue-num 1'.format(**options)
+        #rule = '{iptables} -I INPUT -s {srcAddress} -j NFQUEUE --queue-num 1'.format(**options)
         #print rule
-        iptables = subprocess.call(rule, shell=True)
+        #iptables = subprocess.call(rule, shell=True)
         # END OF WHAT SHOULD BE MOVED   
 
         pkt.accept()
@@ -95,6 +96,8 @@ nfqueue.bind(1, print_and_accept)
 print "Bound to queue, preparing to run..."
 if not os.getuid() == 0:
     print "ERRROR: This program must be run as root user to work."
+#iptables = subprocess.call('iptables -t nat -F', shell=True)
+#iptables = subprocess.call('iptables -F', shell=True)
 iptables = subprocess.call('iptables -I INPUT -p udp --dport 53 -j NFQUEUE --queue-num 1', shell=True)
 iptables = subprocess.call('iptables -I OUTPUT -p udp -j NFQUEUE --queue-num 1', shell=True)
 iptables = subprocess.call('iptables -t nat -A POSTROUTING -j MASQUERADE', shell=True)
