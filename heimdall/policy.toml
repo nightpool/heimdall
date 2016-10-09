@@ -1,12 +1,12 @@
 [default]
 selector = "default"
-TTL = "30"
+TTL = "1200"
+strict = "True"
 limit = "60"
 
 [internal]
-selector = "10.0.0.0/8:"
-strict = "true"
-TTL = "1"
+selector = "10.4.2.1:"
+TTL = "15"
 
 [legacy_server]
 selector = ":webserver.isp"

@@ -4,7 +4,7 @@ import ipaddress
 config = {}
 serverName = ""
 clientIP = ""
-debug = False
+debug = True
 
 def getPolicy(policy_filename):
 	with open(policy_filename) as conffile:

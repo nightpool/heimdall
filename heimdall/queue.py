@@ -6,10 +6,11 @@ import time
 import subprocess
 
 class Capability:
-    def __init__(self, client_ip_addr,  expiration_time):
+    def __init__(self, client_ip_addr, useStrict, expiration_time):
         self.client_ip_addr = client_ip_addr
         self.mapped_ip_addr = "127.0.0.1"
         self.exp_time = expiration_time
+	self.useStrict = useStrict
 
     def setMappedIP(self, mappedIP):
         self.mapped_ip_addr = mappedIP
@@ -42,7 +43,10 @@ class CapabilityQueue:
         
         #add iptables rules for this capability
         options = {'iptables': '/sbin/iptables', 'clientAddress': capability.client_ip_addr, 'mappedAddress': capability.mapped_ip_addr}
-        rule = "{iptables} -t nat -A PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
+	if(capability.useStrict):
+            rule = "{iptables} -t nat -A PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
+	else:
+	    rule = "{iptables} -t nat -A PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
         iptables = subprocess.call(rule, shell=True)
 
         print "A capability for", capability.client_ip_addr, "has been granted on IP Address", capability.mapped_ip_addr, "at time", round(time.time(),2)
@@ -58,7 +62,10 @@ class CapabilityQueue:
 
                 #remove the iptables rules with this capability
                 options = {'iptables': '/sbin/iptables', 'clientAddress': cap.client_ip_addr, 'mappedAddress': cap.mapped_ip_addr}
-                rule = "{iptables} -t nat -D PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
+                if(cap.useStrict):
+		    rule = "{iptables} -t nat -D PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
+		else:
+		    rule = "{iptables} -t nat -D PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
                 iptables = subprocess.call(rule, shell=True)
                 #finally remove the capability from the list
                 print "A capability for", cap.client_ip_addr, "has expired at time", round(time.time(),2)
