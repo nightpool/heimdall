@@ -42,11 +42,8 @@ class CapabilityQueue:
         
         #add iptables rules for this capability
         options = {'iptables': '/sbin/iptables', 'clientAddress': capability.client_ip_addr, 'mappedAddress': capability.mapped_ip_addr}
-        rule = "{iptables} -t nat -A PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
-        #rule2 ="{iptables} -t nat -A POSTROUTING -j MASQUERADE"
-        print "Calling IPtables"
+        rule = "{iptables} -t nat -A PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
         iptables = subprocess.call(rule, shell=True)
-        #iptables = subprocess.call(rule2, shell=True)
 
         print "A capability for", capability.client_ip_addr, "has been granted on IP Address", capability.mapped_ip_addr
 
@@ -61,7 +58,7 @@ class CapabilityQueue:
 
                 #remove the iptables rules with this capability
                 options = {'iptables': '/sbin/iptables', 'clientAddress': cap.client_ip_addr, 'mappedAddress': cap.mapped_ip_addr}
-                rule = "{iptables} -t nat -D PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
+                rule = "{iptables} -t nat -D PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
                 iptables = subprocess.call(rule, shell=True)
                 #finally remove the capability from the list
                 print "A capability for", cap.client_ip_addr, "has expired."
