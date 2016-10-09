@@ -28,7 +28,7 @@ no_route_to_destination = []
 other_errors = []
 
 #Display the result as each attempt is made
-verbose = False
+verbose = True
 
 print 'Conducting scan on addresses in range {} to {}'.format(ip_address_start + str(rangeStart), ip_address_start + str(rangeEnd))
 
