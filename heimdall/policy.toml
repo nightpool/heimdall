@@ -1,0 +1,13 @@
+[default]
+selector = "default"
+TTL = "5"
+limit = "60"
+
+[internal]
+selector = "*.*.*.3:"
+strict = "true"
+TTL = "1"
+
+[legacy_server]
+selector = ":web.wpi.edu"
+TTL = "3600"
