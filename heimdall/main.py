@@ -1,18 +1,13 @@
-from contextlib import contextmanager
+import sys, random, os, threading, time
+
 from netfilterqueue import NetfilterQueue
 from scapy.all import *
+
 from queue import Capability, CapabilityQueue, queueHandler
 import policy
-import random
-import sys
-import os
-import threading
-import time
 
+DENIED_CAP = "127.0.0.1"
 def print_and_accept(pkt):
-
-    denied_capability = "127.0.0.1"
-
     new_packet = IP(pkt.get_payload())
 
     #packet is arriving as a DNS lookup, dont modify
@@ -30,44 +25,44 @@ def print_and_accept(pkt):
     serverName = dns.qd[0].qname
     serverName = serverName[0:len(serverName)-1]
 
-    selected_policy = policy.matchPolicy(config, serverName, clientIP)
-    try:
-        useStrict = bool(selected_policy['strict'])
-    except:
-        useStrict = False
+    print "packet from {} for {}".format(clientIP, serverName)
 
-    try:
-        if(selected_policy['always'] == "deny"):
-            grantCapability = False
-        else:
-            grantCapability = True
-    except:
+    selected_policy = policy.matchPolicy(config, serverName, clientIP)
+
+    grantCapability = True # TK rate limiter
+
+    useStrict = bool(selected_policy.get('strict', 'true'))
+    override = selected_policy.get("always")
+
+    if override == "deny":
+        grantCapability = False
+    if override == "allow"
         grantCapability = True
 
-    print 'Using Policy: {}.'.format(selected_policy)
+    print '  policy: {}'.format(selected_policy)
 
     #granting a capability to a new client
     if grantCapability:
         if not capabilityQueue.containsCapability(clientIP):
             newCapability = Capability(clientIP, useStrict, time.time() + int(selected_policy['TTL']) + 5)
-                capabilityQueue.addCapability(newCapability)
-                mappedIP = newCapability.mapped_ip_addr
+            capabilityQueue.addCapability(newCapability)
+            mappedIP = newCapability.mapped_ip_addr
         else:
             for cap in capabilityQueue.capabilities:
                 if cap.client_ip_addr == clientIP:
                         mappedIP = cap.mapped_ip_addr
     else:
-        mappedIP = "127.0.0.1"
+        mappedIP = DENIED_CAP
     
     #set all of the dns answers to the given IP for the client
     for i in range(dns.ancount):
-        dns.an[i].rdata = mappedIP #"10.4.2.4"
+        dns.an[i].rdata = mappedIP
         dns.an[i].ttl = int(selected_policy['TTL'])
 
     #set all of the dns additional records to the given IP
     #(to ensure the server IP stays hidden)
     for i in range(dns.arcount):
-        dns.ar[i].rdata = mappedIP #"10.4.2.4"
+        dns.ar[i].rdata = mappedIP
         dns.ar[i].ttl = int(selected_policy['TTL'])
 
     # Scapy doesn't check the length and checksum by default when reforming
@@ -104,8 +99,6 @@ queueThread = threading.Thread(target=queueHandler, args=(capabilityQueue,))
 queueThread.start()
 
 config = policy.getPolicy("policy.toml")
-clientIP = "0.0.0.0"
-serverName = ""
 
 ## setup a policy reading thread
 ## to re-read the policy file every 60s
