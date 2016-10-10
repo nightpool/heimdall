@@ -1,6 +1,8 @@
 import toml
 import ipaddress
 
+debug = True
+
 def getPolicy(config_filename):
     with open(config_filename) as conffile:
         config = toml.loads(conffile.read())
@@ -17,7 +19,7 @@ def checkPolicy(policy, config, clientIP, serverName):
 #needs config, clientIP, serverName
 #Evaluate the Selector field of a policy to see if it is a match for the client IP and server name.
 def compareSelector(policy, config, clientIP, serverName):
-    if debug:   
+    if debug:
         print '    comparing selectors on policy {}'.format(policy)
     ipMatch = True
     serverMatch = True
@@ -28,10 +30,10 @@ def compareSelector(policy, config, clientIP, serverName):
         if '/' in selectors[0]: #CIDR
             if ipaddress.ip_address(unicode(clientIP, "utf-8")) not in ipaddress.ip_network(selectors[0], strict=False):
                 ipMatch = False
-        else: #wildcard 
+        else: #wildcard
             if len(clientIP) != len(selectors[0]):
                 ipMatch = False
-            else: 
+            else:
                 for i,c in enumerate(selectors[0]):
                     if (c != '*') and (c != clientIP[i]):
                         ipMatch = False
@@ -41,7 +43,6 @@ def compareSelector(policy, config, clientIP, serverName):
     if debug:
         print '    returning {} and {}'.format(ipMatch, serverMatch)
     return ipMatch and serverMatch
-    
 
 #needs config
 #start with the config file, and iterate over each policy after the default one.

@@ -1,13 +1,14 @@
 [default]
 selector = "default"
 TTL = "1200"
-strict = "True"
+strict = "False"
 limit = "60"
 
 [internal]
 selector = "10.4.2.1:"
+strict = "False"
 TTL = "15"
 
-[legacy_server]
-selector = ":webserver.isp"
-TTL = "3600"
+# [legacy_server]
+# selector = ":webserver.isp"
+# TTL = "3600"

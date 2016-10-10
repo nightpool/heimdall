@@ -14,10 +14,14 @@ def print_and_accept(pkt):
     if new_packet[IP].dst == "10.4.2.3":
         pkt.accept()
         return
-    
+
     try:
         dns = new_packet['DNS']
     except:
+        pkt.accept()
+        return
+
+    if not dns.ancount:
         pkt.accept()
         return
 
@@ -26,6 +30,7 @@ def print_and_accept(pkt):
     serverName = serverName[0:len(serverName)-1]
 
     print "packet from {} for {}".format(clientIP, serverName)
+    print "  an: {}, ar: {}".format(dns.ancount, dns.arcount)
 
     selected_policy = policy.matchPolicy(config, serverName, clientIP)
 
@@ -36,7 +41,7 @@ def print_and_accept(pkt):
 
     if override == "deny":
         grantCapability = False
-    if override == "allow"
+    if override == "allow":
         grantCapability = True
 
     print '  policy: {}'.format(selected_policy)
@@ -53,7 +58,7 @@ def print_and_accept(pkt):
                         mappedIP = cap.mapped_ip_addr
     else:
         mappedIP = DENIED_CAP
-    
+
     #set all of the dns answers to the given IP for the client
     for i in range(dns.ancount):
         dns.an[i].rdata = mappedIP
@@ -89,6 +94,7 @@ if not os.getuid() == 0:
     print "ERRROR: This program must be run as root user to work."
 
 #setup some initial rules to interface with netfilter queue
+subprocess.call('iptables -F', shell=True)
 subprocess.call('iptables -I INPUT -p udp --dport 53 -j NFQUEUE --queue-num 1', shell=True)
 subprocess.call('iptables -I OUTPUT -p udp -j NFQUEUE --queue-num 1', shell=True)
 subprocess.call('iptables -t nat -A POSTROUTING -j MASQUERADE', shell=True)
@@ -118,3 +124,4 @@ except KeyboardInterrupt:
 subprocess.call('iptables -F', shell=True)
 print "Done."
 nfqueue.unbind()
+queueThread.join()
