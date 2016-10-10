@@ -1,0 +1,19 @@
+; BIND data file for webserver.isp
+;
+$TTL 14400
+@ IN SOA ns1.webserver.isp. host.webserver.isp. (
+    201006601	; Serial
+    7200 	; Refresh
+    120		; Retry
+    2419200	; Expire
+    604800)	; Default TTL
+    IN NS ns1.webserver.isp.
+    IN NS ns2.webserver.isp.
+    
+    IN MX 10 mail.webserver.isp.
+    IN A 10.4.2.4
+
+ns1 IN A 10.4.2.4
+ns2 IN A 10.4.2.4
+www IN CNAME webserver.isp.
+mail IN A 10.4.2.4
