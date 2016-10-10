@@ -60,15 +60,3 @@ def matchPolicy(policies, serverName, clientIP):
     if debug:
         print 'Choosing the default policy.'
     return config['default']
-
-
-
-#config = getPolicy("policy.toml")
-#represents info from a current dns request
-#clientIP = '10.4.2.2'
-#serverName = 'web.wpi.edu'
-#matchPolicy()
-
-
-
-

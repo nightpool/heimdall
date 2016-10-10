@@ -63,9 +63,9 @@ class CapabilityQueue:
                 #remove the iptables rules with this capability
                 options = {'iptables': '/sbin/iptables', 'clientAddress': cap.client_ip_addr, 'mappedAddress': cap.mapped_ip_addr}
                 if(cap.useStrict):
-		    rule = "{iptables} -t nat -D PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
-		else:
-		    rule = "{iptables} -t nat -D PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
+                    rule = "{iptables} -t nat -D PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
+                else:
+                    rule = "{iptables} -t nat -D PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)        
                 iptables = subprocess.call(rule, shell=True)
                 #finally remove the capability from the list
                 print "A capability for", cap.client_ip_addr, "has expired at time", round(time.time(),2)
