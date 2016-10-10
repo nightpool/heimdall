@@ -10,7 +10,7 @@ class Capability:
         self.client_ip_addr = client_ip_addr
         self.mapped_ip_addr = "127.0.0.1"
         self.exp_time = expiration_time
-	self.useStrict = useStrict
+        self.useStrict = useStrict
 
     def setMappedIP(self, mappedIP):
         self.mapped_ip_addr = mappedIP
@@ -40,13 +40,13 @@ class CapabilityQueue:
         self.availableIPs.remove(mappedIP)
         self.inUseIPs.append(mappedIP)
         self.activeClients.append(capability.client_ip_addr)
-        
+
         #add iptables rules for this capability
         options = {'iptables': '/sbin/iptables', 'clientAddress': capability.client_ip_addr, 'mappedAddress': capability.mapped_ip_addr}
-	if(capability.useStrict):
+        if(capability.useStrict):
             rule = "{iptables} -t nat -A PREROUTING -p tcp -s {clientAddress} -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
-	else:
-	    rule = "{iptables} -t nat -A PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
+        else:
+            rule = "{iptables} -t nat -A PREROUTING -p tcp -d {mappedAddress} --dport 80 -j DNAT --to-destination 10.4.2.4:80".format(**options)
         iptables = subprocess.call(rule, shell=True)
 
         print "A capability for", capability.client_ip_addr, "has been granted on IP Address", capability.mapped_ip_addr, "at time", round(time.time(),2)

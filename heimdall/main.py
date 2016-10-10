@@ -36,7 +36,7 @@ def print_and_accept(pkt):
 
     grantCapability = True # TK rate limiter
 
-    useStrict = bool(selected_policy.get('strict', 'true'))
+    useStrict = selected_policy.get('strict', 'true') in ('1', 'true', 'True')
     override = selected_policy.get("always")
 
     if override == "deny":
@@ -95,6 +95,7 @@ if not os.getuid() == 0:
 
 #setup some initial rules to interface with netfilter queue
 subprocess.call('iptables -F', shell=True)
+subprocess.call('iptables -t nat -F', shell=True)
 subprocess.call('iptables -I INPUT -p udp --dport 53 -j NFQUEUE --queue-num 1', shell=True)
 subprocess.call('iptables -I OUTPUT -p udp -j NFQUEUE --queue-num 1', shell=True)
 subprocess.call('iptables -t nat -A POSTROUTING -j MASQUERADE', shell=True)
@@ -122,6 +123,7 @@ except KeyboardInterrupt:
     print('')
 
 subprocess.call('iptables -F', shell=True)
+subprocess.call('iptables -t nat -F', shell=True)
 print "Done."
 nfqueue.unbind()
 queueThread.join()
