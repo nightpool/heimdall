@@ -5,9 +5,9 @@ strict = "False"
 limit = "60"
 
 [internal]
-selector = "10.4.2.1:"
+selector = "10.4.2.2:"
 strict = "False"
-TTL = "15"
+TTL = "600"
 
 # [legacy_server]
 # selector = ":webserver.isp"

@@ -100,3 +100,4 @@ def queueHandler(queue):
         #    queue.printQueue()
         queue.removeExpirations()
         time.sleep(.5)
+    return

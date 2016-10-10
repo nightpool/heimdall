@@ -120,6 +120,7 @@ config = policy.getPolicy("policy.toml")
 try:
     nfqueue.run()
 except KeyboardInterrupt:
+    capabilityQueue.disable()
     print('')
 
 subprocess.call('iptables -F', shell=True)
