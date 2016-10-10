@@ -1,0 +1,19 @@
+[default]
+selector = "default"
+TTL = "1200"
+strict = "True"
+limit = "60"
+
+[risky_client]
+selector = "10.4.2.1:"
+always = "deny"
+TTL = "15"
+
+[internal]
+selector = "10.0.0.0/8:"
+strict = "True"
+TTL = "15"
+
+[legacy_server]
+selector = ":webserver.isp"
+TTL = "3600"
